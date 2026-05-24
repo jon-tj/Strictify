@@ -91,7 +91,7 @@ int main(int argc, char** argv) {
     for (size_t i = 0; i < futures.size(); ++i) {
         std::optional<MarkdownFile> parsed = futures[i].get();
         if (!parsed.has_value()) {
-            errors.push_back(relativeOrOriginal(markdownPaths[i], reportBase) + ": invalid or unterminated frontmatter");
+            errors.push_back(relativeOrOriginal(markdownPaths[i], reportBase) + ":1: invalid or unterminated frontmatter");
             continue;
         }
         markdownFiles.push_back(std::move(parsed.value()));

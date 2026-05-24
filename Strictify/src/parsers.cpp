@@ -162,6 +162,7 @@ std::optional<MarkdownFile> parseMarkdownFile(const fs::path& markdownPath) {
             const std::string value = stripQuotes(rawValue);
             if (!key.empty()) {
                 file.frontmatter[key] = value;
+                file.frontmatterLine[key] = i + 1;
             }
         }
     }
@@ -171,11 +172,16 @@ std::optional<MarkdownFile> parseMarkdownFile(const fs::path& markdownPath) {
     }
 
     static const std::regex tagRegex(R"((^|\s)#([A-Za-z][A-Za-z0-9_\-]*))");
-    for (const std::string& contentLine : file.lines) {
+    for (size_t lineIndex = 0; lineIndex < file.lines.size(); ++lineIndex) {
+        const std::string& contentLine = file.lines[lineIndex];
         std::sregex_iterator iter(contentLine.begin(), contentLine.end(), tagRegex);
         std::sregex_iterator end;
         for (; iter != end; ++iter) {
-            file.tags.insert(iter->str(2));
+            const std::string tag = iter->str(2);
+            file.tags.insert(tag);
+            if (file.tagLine.find(tag) == file.tagLine.end()) {
+                file.tagLine[tag] = lineIndex + 1;
+            }
         }
     }
 

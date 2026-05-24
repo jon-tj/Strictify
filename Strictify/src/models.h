@@ -26,6 +26,8 @@ struct SchemaDefinition {
 struct MarkdownFile {
     fs::path path;
     std::unordered_map<std::string, std::string> frontmatter;
+    std::unordered_map<std::string, size_t> frontmatterLine;
     std::set<std::string> tags;
+    std::unordered_map<std::string, size_t> tagLine;
     std::vector<std::string> lines;
 };

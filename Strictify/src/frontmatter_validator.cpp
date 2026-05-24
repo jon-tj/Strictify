@@ -15,6 +15,7 @@ std::vector<std::string> validateFrontmatter(
         const std::string filePath = relativeOrOriginal(file.path, root);
 
         for (const std::string& tag : file.tags) {
+            const size_t tagLine = file.tagLine.find(tag) != file.tagLine.end() ? file.tagLine.at(tag) : 1;
             const auto schemaIt = schemasByTag.find(toLower(tag));
             if (schemaIt == schemasByTag.end()) {
                 continue;
@@ -25,9 +26,11 @@ std::vector<std::string> validateFrontmatter(
                 const std::string& propertyName = propertyEntry.first;
                 const PropertyRule& rule = propertyEntry.second;
                 const auto valueIt = file.frontmatter.find(propertyName);
+                const size_t fieldLine =
+                    file.frontmatterLine.find(propertyName) != file.frontmatterLine.end() ? file.frontmatterLine.at(propertyName) : tagLine;
 
                 if (rule.required && valueIt == file.frontmatter.end()) {
-                    errors.push_back(filePath + ": missing required field '" + propertyName + "' for tag #" + tag);
+                    errors.push_back(filePath + ":" + std::to_string(tagLine) + ": missing required field '" + propertyName + "' for tag #" + tag);
                     continue;
                 }
 
@@ -39,12 +42,12 @@ std::vector<std::string> validateFrontmatter(
                 if (rule.type.has_value()) {
                     const std::string type = toLower(rule.type.value());
                     if (type == "string" && value.empty()) {
-                        errors.push_back(filePath + ": field '" + propertyName + "' must be a non-empty string");
+                        errors.push_back(filePath + ":" + std::to_string(fieldLine) + ": field '" + propertyName + "' must be a non-empty string");
                     }
                 }
 
                 if (rule.format.has_value() && toLower(rule.format.value()) == "date" && !isIsoDate(value)) {
-                    errors.push_back(filePath + ": field '" + propertyName + "' must be a valid date (YYYY-MM-DD)");
+                    errors.push_back(filePath + ":" + std::to_string(fieldLine) + ": field '" + propertyName + "' must be a valid date (YYYY-MM-DD)");
                 }
 
                 if (!rule.enumValues.empty()) {
@@ -56,7 +59,7 @@ std::vector<std::string> validateFrontmatter(
                         }
                     }
                     if (!found) {
-                        errors.push_back(filePath + ": field '" + propertyName + "' has invalid value '" + value + "'");
+                        errors.push_back(filePath + ":" + std::to_string(fieldLine) + ": field '" + propertyName + "' has invalid value '" + value + "'");
                     }
                 }
 
@@ -68,7 +71,7 @@ std::vector<std::string> validateFrontmatter(
                     const auto referencedIt = markdownByFileName.find(lookup);
                     if (referencedIt == markdownByFileName.end() || referencedIt->second.empty()) {
                         if (!referencesAreOptional) {
-                            errors.push_back(filePath + ": field '" + propertyName + "' references missing file '" + filename + "'");
+                            errors.push_back(filePath + ":" + std::to_string(fieldLine) + ": field '" + propertyName + "' references missing file '" + filename + "'");
                         }
                         continue;
                     }
@@ -96,7 +99,7 @@ std::vector<std::string> validateFrontmatter(
                     }
 
                     if (!validReferenceTag && !referencesAreOptional) {
-                        errors.push_back(filePath + ": field '" + propertyName + "' references '" + filename + "' but it does not contain " + expectedTags);
+                        errors.push_back(filePath + ":" + std::to_string(fieldLine) + ": field '" + propertyName + "' references '" + filename + "' but it does not contain " + expectedTags);
                     }
                 }
             }

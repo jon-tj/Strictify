@@ -63,11 +63,13 @@ std::vector<std::string> validateContentLinks(
 
         for (const std::string& tag : file.tags) {
             if (schemasByTag.find(toLower(tag)) == schemasByTag.end()) {
-                errors.push_back(filePath + ": unknown entity tag #" + tag + " (no matching schema in src)");
+                const size_t tagLine = file.tagLine.find(tag) != file.tagLine.end() ? file.tagLine.at(tag) : 1;
+                errors.push_back(filePath + ":" + std::to_string(tagLine) + ": unknown entity tag #" + tag + " (no matching schema in src)");
             }
         }
 
-        for (const std::string& line : file.lines) {
+        for (size_t lineIndex = 0; lineIndex < file.lines.size(); ++lineIndex) {
+            const std::string& line = file.lines[lineIndex];
             std::sregex_iterator iter(line.begin(), line.end(), linkRegex);
             std::sregex_iterator end;
             for (; iter != end; ++iter) {
@@ -84,7 +86,7 @@ std::vector<std::string> validateContentLinks(
 
                 fs::path resolved = (file.path.parent_path() / fs::path(target)).lexically_normal();
                 if (!fs::exists(resolved)) {
-                    errors.push_back(filePath + ": invalid link target '" + rawTarget + "' (resolved: '" + target + "')");
+                    errors.push_back(filePath + ":" + std::to_string(lineIndex + 1) + ": invalid link target '" + rawTarget + "' (resolved: '" + target + "')");
                 }
             }
         }

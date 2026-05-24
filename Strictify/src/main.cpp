@@ -20,14 +20,28 @@ int main(int argc, char** argv) {
         return 1;
     }
 
-    fs::path root = fs::path(argv[1]);
-    fs::path schemaDir = argc > 2 ? fs::path(argv[2]) : root / "src";
+    const fs::path inputPath = fs::path(argv[1]);
+    fs::path root = inputPath;
 
     std::error_code ec;
     root = fs::weakly_canonical(root, ec);
     if (ec) {
-        std::cerr << "Unable to resolve root path: " << root.string() << '\n';
+        std::cerr << "Unable to resolve input path: " << inputPath.string() << '\n';
         return 1;
+    }
+
+    const bool inputIsDirectory = fs::is_directory(root);
+    const bool inputIsFile = fs::is_regular_file(root);
+    if (!inputIsDirectory && !inputIsFile) {
+        std::cerr << "Input path is neither a directory nor a file: " << root.string() << '\n';
+        return 1;
+    }
+
+    fs::path schemaDir;
+    if (argc > 2) {
+        schemaDir = fs::path(argv[2]);
+    } else {
+        schemaDir = inputIsDirectory ? (root / "src") : (root.parent_path() / "src");
     }
 
     schemaDir = fs::weakly_canonical(schemaDir, ec);
@@ -47,11 +61,20 @@ int main(int argc, char** argv) {
     }
 
     std::vector<fs::path> markdownPaths;
-    for (const fs::directory_entry& entry : fs::recursive_directory_iterator(root)) {
-        if (entry.is_regular_file() && toLower(entry.path().extension().string()) == ".md") {
-            markdownPaths.push_back(entry.path());
+    if (inputIsDirectory) {
+        for (const fs::directory_entry& entry : fs::recursive_directory_iterator(root)) {
+            if (entry.is_regular_file() && toLower(entry.path().extension().string()) == ".md") {
+                markdownPaths.push_back(entry.path());
+            }
         }
+    } else if (toLower(root.extension().string()) == ".md") {
+        markdownPaths.push_back(root);
+    } else {
+        std::cerr << "Input file must be a markdown file: " << root.string() << '\n';
+        return 1;
     }
+
+    const fs::path reportBase = inputIsDirectory ? root : root.parent_path();
 
     std::vector<std::future<std::optional<MarkdownFile>>> futures;
     futures.reserve(markdownPaths.size());
@@ -68,7 +91,7 @@ int main(int argc, char** argv) {
     for (size_t i = 0; i < futures.size(); ++i) {
         std::optional<MarkdownFile> parsed = futures[i].get();
         if (!parsed.has_value()) {
-            errors.push_back(relativeOrOriginal(markdownPaths[i], root) + ": invalid or unterminated frontmatter");
+            errors.push_back(relativeOrOriginal(markdownPaths[i], reportBase) + ": invalid or unterminated frontmatter");
             continue;
         }
         markdownFiles.push_back(std::move(parsed.value()));
@@ -80,8 +103,8 @@ int main(int argc, char** argv) {
     }
 
     std::vector<std::string> frontmatterErrors =
-        validateFrontmatter(markdownFiles, schemasByTag, markdownByFileName, root);
-    std::vector<std::string> contentErrors = validateContentLinks(markdownFiles, schemasByTag, root);
+        validateFrontmatter(markdownFiles, schemasByTag, markdownByFileName, reportBase);
+    std::vector<std::string> contentErrors = validateContentLinks(markdownFiles, schemasByTag, reportBase);
 
     errors.insert(errors.end(), frontmatterErrors.begin(), frontmatterErrors.end());
     errors.insert(errors.end(), contentErrors.begin(), contentErrors.end());

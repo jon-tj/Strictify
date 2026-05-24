@@ -15,8 +15,13 @@
 namespace fs = std::filesystem;
 
 int main(int argc, char** argv) {
-    fs::path root = argc > 1 ? fs::path(argv[1]) : fs::current_path();
-    fs::path schemaDir = argc > 2 ? fs::path(argv[2]) : root / "Example" / "src";
+    if (argc < 2) {
+        std::cout << "Usage: strictify <notes_root> [schema_dir]" << '\n';
+        return 1;
+    }
+
+    fs::path root = fs::path(argv[1]);
+    fs::path schemaDir = argc > 2 ? fs::path(argv[2]) : root / "src";
 
     std::error_code ec;
     root = fs::weakly_canonical(root, ec);

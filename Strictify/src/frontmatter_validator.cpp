@@ -61,11 +61,15 @@ std::vector<std::string> validateFrontmatter(
                 }
 
                 if (!rule.refs.empty()) {
+                    const bool referencesAreOptional =
+                        rule.allowsPlainString || (rule.type.has_value() && toLower(rule.type.value()) == "string");
                     const std::string filename = ensureMdExtension(value);
                     const std::string lookup = toLower(fs::path(filename).filename().string());
                     const auto referencedIt = markdownByFileName.find(lookup);
                     if (referencedIt == markdownByFileName.end() || referencedIt->second.empty()) {
-                        errors.push_back(filePath + ": field '" + propertyName + "' references missing file '" + filename + "'");
+                        if (!referencesAreOptional) {
+                            errors.push_back(filePath + ": field '" + propertyName + "' references missing file '" + filename + "'");
+                        }
                         continue;
                     }
 
@@ -91,7 +95,7 @@ std::vector<std::string> validateFrontmatter(
                         }
                     }
 
-                    if (!validReferenceTag) {
+                    if (!validReferenceTag && !referencesAreOptional) {
                         errors.push_back(filePath + ": field '" + propertyName + "' references '" + filename + "' but it does not contain " + expectedTags);
                     }
                 }

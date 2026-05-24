@@ -5,6 +5,7 @@ properties:
     anyOf:
       - $ref: "#/$defs/Person"
       - $ref: "#/$defs/Organization"
+      - type: string
   title:
     type: string
   publisher:

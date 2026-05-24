@@ -81,6 +81,9 @@ SchemaDefinition parseSchemaFile(const fs::path& schemaPath) {
 
             if (innerTrimmed.rfind("type:", 0) == 0) {
                 rule.type = stripQuotes(innerTrimmed.substr(std::string("type:").size()));
+                if (toLower(rule.type.value()) == "string") {
+                    rule.allowsPlainString = true;
+                }
             } else if (innerTrimmed.rfind("format:", 0) == 0) {
                 rule.format = stripQuotes(innerTrimmed.substr(std::string("format:").size()));
             } else if (innerTrimmed.rfind("enum:", 0) == 0) {
@@ -103,6 +106,11 @@ SchemaDefinition parseSchemaFile(const fs::path& schemaPath) {
                     const std::optional<std::string> ref = captureRefName(refCandidate);
                     if (ref.has_value()) {
                         rule.refs.push_back(ref.value());
+                    } else if (refCandidate.rfind("type:", 0) == 0) {
+                        const std::string anyOfType = toLower(stripQuotes(refCandidate.substr(std::string("type:").size())));
+                        if (anyOfType == "string") {
+                            rule.allowsPlainString = true;
+                        }
                     }
 
                     ++index;

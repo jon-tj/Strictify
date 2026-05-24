@@ -11,6 +11,7 @@ namespace fs = std::filesystem;
 
 struct PropertyRule {
     bool required = false;
+    bool allowsPlainString = false;
     std::optional<std::string> type;
     std::optional<std::string> format;
     std::vector<std::string> enumValues;

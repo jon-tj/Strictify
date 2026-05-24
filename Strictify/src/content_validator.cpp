@@ -51,12 +51,21 @@ bool isExternalTarget(const std::string& target) {
 
 } // namespace
 
-std::vector<std::string> validateContentLinks(const std::vector<MarkdownFile>& markdownFiles, const fs::path& root) {
+std::vector<std::string> validateContentLinks(
+    const std::vector<MarkdownFile>& markdownFiles,
+    const std::unordered_map<std::string, SchemaDefinition>& schemasByTag,
+    const fs::path& root) {
     std::vector<std::string> errors;
     static const std::regex linkRegex(R"(\[[^\]]*\]\(([^)]+)\))");
 
     for (const MarkdownFile& file : markdownFiles) {
         const std::string filePath = relativeOrOriginal(file.path, root);
+
+        for (const std::string& tag : file.tags) {
+            if (schemasByTag.find(toLower(tag)) == schemasByTag.end()) {
+                errors.push_back(filePath + ": unknown entity tag #" + tag + " (no matching schema in src)");
+            }
+        }
 
         for (const std::string& line : file.lines) {
             std::sregex_iterator iter(line.begin(), line.end(), linkRegex);

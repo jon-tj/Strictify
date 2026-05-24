@@ -81,7 +81,7 @@ int main(int argc, char** argv) {
 
     std::vector<std::string> frontmatterErrors =
         validateFrontmatter(markdownFiles, schemasByTag, markdownByFileName, root);
-    std::vector<std::string> contentErrors = validateContentLinks(markdownFiles, root);
+    std::vector<std::string> contentErrors = validateContentLinks(markdownFiles, schemasByTag, root);
 
     errors.insert(errors.end(), frontmatterErrors.begin(), frontmatterErrors.end());
     errors.insert(errors.end(), contentErrors.begin(), contentErrors.end());

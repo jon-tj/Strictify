@@ -5,8 +5,6 @@ Status: Completed
 ---
 #Book
 
-#Strategy
-
 [Art of war](The%20Art%20of%20War.md)
 
-Here is an [Invalid link](./src/a)
+Here is an [Invalid link](./src/)

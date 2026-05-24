@@ -4,7 +4,7 @@
     {
       "label": "Strictify: Lint Example",
       "type": "shell",
-      "command": "${workspaceFolder}\\build\\Debug\\strictify.exe",
+      "command": "${workspaceFolder}\\Strictify\\build\\Debug\\strictify.exe",
       "args": [
         "${workspaceFolder}\\..\\Example",
         "${workspaceFolder}\\..\\Example\\src"
@@ -17,9 +17,10 @@
           "${workspaceFolder}\\..\\Example"
         ],
         "pattern": {
-          "regexp": "^(.*\\.md):\\s(.+)$",
+          "regexp": "^(.*\\.md):([0-9]+):\\s(.+)$",
           "file": 1,
-          "message": 2
+          "line": 2,
+          "message": 3
         }
       }
     },
@@ -29,15 +30,20 @@
       "command": "${workspaceFolder}\\Strictify\\build\\Debug\\strictify.exe",
       "args": [
         "${file}",
+        "${fileDirname}\\src"
       ],
       "group": "test",
       "problemMatcher": {
         "owner": "strictify",
-        "fileLocation": "absolute",
+        "fileLocation": [
+          "relative",
+          "${fileDirname}"
+        ],
         "pattern": {
-          "regexp": "^(.*\\.md):\\s(.+)$",
+          "regexp": "^(.*\\.md):([0-9]+):\\s(.+)$",
           "file": 1,
-          "message": 2
+          "line": 2,
+          "message": 3
         }
       }
     }

@@ -1,0 +1,3 @@
+C:/Users/Jon/Documents/GitHub/Strictify/Strictify/build/CMakeFiles/strictify.dir
+C:/Users/Jon/Documents/GitHub/Strictify/Strictify/build/CMakeFiles/ALL_BUILD.dir
+C:/Users/Jon/Documents/GitHub/Strictify/Strictify/build/CMakeFiles/ZERO_CHECK.dir

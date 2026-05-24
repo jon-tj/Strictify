@@ -1,0 +1,19 @@
+type: object
+required: [author, title]
+properties:
+  author:
+    anyOf:
+      - $ref: "#/$defs/Person"
+      - $ref: "#/$defs/Organization"
+  title:
+    type: string
+  publisher:
+    $ref: "#/$defs/Organization"
+  publicationDate:
+    type: string
+    format: date
+  isbn:
+    type: string
+  status:
+    type: string
+    enum: [Reading, Completed, "On Hold", Dropped]

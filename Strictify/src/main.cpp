@@ -1,3 +1,4 @@
+#include "card_validator.h"
 #include "content_validator.h"
 #include "frontmatter_validator.h"
 #include "parsers.h"
@@ -105,9 +106,11 @@ int main(int argc, char** argv) {
     std::vector<std::string> frontmatterErrors =
         validateFrontmatter(markdownFiles, schemasByTag, markdownByFileName, reportBase);
     std::vector<std::string> contentErrors = validateContentLinks(markdownFiles, schemasByTag, reportBase);
+    std::vector<std::string> cardErrors = validateAndFixCards(markdownFiles, schemaDir, reportBase);
 
     errors.insert(errors.end(), frontmatterErrors.begin(), frontmatterErrors.end());
     errors.insert(errors.end(), contentErrors.begin(), contentErrors.end());
+    errors.insert(errors.end(), cardErrors.begin(), cardErrors.end());
 
     std::sort(errors.begin(), errors.end());
     if (!errors.empty()) {

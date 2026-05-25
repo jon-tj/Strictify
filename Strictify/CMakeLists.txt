@@ -11,4 +11,5 @@ add_executable(strictify
     src/parsers.cpp
     src/frontmatter_validator.cpp
     src/content_validator.cpp
+    src/card_validator.cpp
 )

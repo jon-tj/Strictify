@@ -1,5 +1,2 @@
-Build and test:
 
-```shell
-cmake -S . -B build; cmake --build build; .\build\strictify.exe ".." "..\Example\src"
-```
+Recommended together with the Foam Graph view.
